@@ -1,7 +1,11 @@
 use std::fs::File;
 use std::io::{self, Read};
 
-type Rucksack<'a> = (&'a str, &'a str);
+struct Rucksacks<'a>(Vec<Rucksack<'a>>);
+struct Rucksack<'a>(&'a str, &'a str);
+impl FromIterator<(&str, &str)> for Rucksacks {
+    fn from_iter<I: IntoIterator<Item = (&str, &str)>>(iter: I) -> Self {}
+}
 
 fn main() {
     println!("Hello, world!");
@@ -29,12 +33,12 @@ fn read_input(path: &str) -> Result<String, io::Error> {
     }
 }
 
-fn parse_input(input: &str) -> Vec<Rucksack> {
+fn parse_input(input: &str) -> Rucksacks {
     input
         .lines()
         .map(|e| e.split_at(&e.len() / 2))
         .into_iter()
-        .collect::<Vec<Rucksack>>()
+        .collect::<Rucksacks>()
         .try_into()
         .unwrap()
 }
@@ -59,7 +63,11 @@ mod tests {
                 rucksack.1.len()
             );
             for b in rucksack.0.as_bytes() {
-                println!("{}", b);
+                if b.is_ascii_lowercase() {
+                    println!("{}", b - 96);
+                } else {
+                    println!("{}", b - 38);
+                }
             }
         }
     }
