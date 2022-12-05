@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::fs::File;
 use std::io::{self, Read};
 
@@ -13,33 +13,49 @@ impl<'a> From<(&'a str, &'a str)> for Rucksack<'a> {
 
 fn main() {
     println!("Hello, world!");
-    let input_data = match read_input("include/input") {
+    let input_data: String = match read_input("include/input") {
         Ok(input) => input,
         Err(e) => panic!("{}", e),
     };
 
-    let rucksacks = parse_input(&input_data);
+    let rucksacks = parse_input(input_data.as_str());
+    let mut sum: i32 = 0;
+    for rucksack in rucksacks {
+        let common_items = get_unique(rucksack);
+        for i in common_items {
+            sum += i as i32;
+        }
+    }
+    println!("sum is {}", sum);
+}
 
-    for r in rucksacks {
-        get_unique(r);
+fn to_priority(i: u8) -> Result<u8, &'static str> {
+    if i.is_ascii_lowercase() {
+        Ok(i - 96)
+    } else if i.is_ascii_uppercase() {
+        Ok(i - 38)
+    } else {
+        Err("not a valid item")
     }
 }
 
 fn get_unique(r: Rucksack) -> Vec<u8> {
     println!("{:?}", r);
-    let mut unique_map: HashMap<u8, bool> = HashMap::with_capacity(26 * 2); // alphabet * 2
+    let mut unique_map: HashSet<u8> = HashSet::with_capacity(26 * 2); // alphabet * 2
     for item in r.0.as_bytes().iter() {
-        if !unique_map.contains_key(item) {
-            println!("adding {}", item);
-            unique_map.insert(*item, true);
-        }
+        unique_map.insert(*item);
     }
 
     r.1.as_bytes()
         .iter()
         .copied()
-        .filter(|b| unique_map.contains_key(b))
+        .filter(|b| unique_map.contains(b))
+        .collect::<HashSet<u8>>()
+        .into_iter()
         .collect::<Vec<u8>>()
+        .into_iter()
+        .map(|p| to_priority(p).unwrap())
+        .collect()
 }
 
 fn read_input(path: &str) -> Result<String, io::Error> {
@@ -76,9 +92,13 @@ mod tests {
         assert!(input_error.is_none());
 
         let rucksacks = parse_input(input_data.as_ref().unwrap().as_str());
+        let mut sum = 0;
         for rucksack in rucksacks {
-            let unique = get_unique(rucksack);
-            println!("{:?}", unique);
+            let common_items = get_unique(rucksack);
+            for i in common_items {
+                sum += i;
+            }
         }
+        assert_eq!(sum, 157);
     }
 }
