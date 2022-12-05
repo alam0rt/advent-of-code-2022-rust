@@ -1,10 +1,12 @@
 use std::fs::File;
 use std::io::{self, Read};
 
-struct Rucksacks<'a>(Vec<Rucksack<'a>>);
 struct Rucksack<'a>(&'a str, &'a str);
-impl FromIterator<(&str, &str)> for Rucksacks {
-    fn from_iter<I: IntoIterator<Item = (&str, &str)>>(iter: I) -> Self {}
+
+impl<'a> From<(&'a str, &'a str)> for Rucksack<'a> {
+    fn from(i: (&'a str, &'a str)) -> Self {
+        Self(i.0, i.1)
+    }
 }
 
 fn main() {
@@ -33,14 +35,11 @@ fn read_input(path: &str) -> Result<String, io::Error> {
     }
 }
 
-fn parse_input(input: &str) -> Rucksacks {
+fn parse_input(input: &str) -> Vec<Rucksack> {
     input
         .lines()
-        .map(|e| e.split_at(&e.len() / 2))
-        .into_iter()
-        .collect::<Rucksacks>()
-        .try_into()
-        .unwrap()
+        .map(|e| Rucksack::from(e.split_at(&e.len() / 2)))
+        .collect::<Vec<Rucksack>>()
 }
 
 #[cfg(test)]
