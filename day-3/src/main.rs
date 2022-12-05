@@ -28,18 +28,18 @@ fn main() {
 fn get_unique(r: Rucksack) -> Vec<u8> {
     println!("{:?}", r);
     let mut unique_map: HashMap<u8, bool> = HashMap::with_capacity(26 * 2); // alphabet * 2
-    let _ = r.0.as_bytes().iter().map(|b| unique_map.insert(*b, true));
+    for item in r.0.as_bytes().iter() {
+        if !unique_map.contains_key(item) {
+            println!("adding {}", item);
+            unique_map.insert(*item, true);
+        }
+    }
 
-    println!("{:?}", unique_map);
-
-    let unique =
-        r.1.as_bytes()
-            .iter()
-            .copied()
-            .filter(|b| unique_map.contains_key(b))
-            .collect::<Vec<u8>>();
-    println!("{:?}", unique);
-    unique
+    r.1.as_bytes()
+        .iter()
+        .copied()
+        .filter(|b| unique_map.contains_key(b))
+        .collect::<Vec<u8>>()
 }
 
 fn read_input(path: &str) -> Result<String, io::Error> {
@@ -77,7 +77,8 @@ mod tests {
 
         let rucksacks = parse_input(input_data.as_ref().unwrap().as_str());
         for rucksack in rucksacks {
-            get_unique(rucksack);
+            let unique = get_unique(rucksack);
+            println!("{:?}", unique);
         }
     }
 }
