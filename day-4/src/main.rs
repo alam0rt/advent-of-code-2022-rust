@@ -2,7 +2,20 @@ use std::fs::File;
 use std::io::{self, BufRead, Read};
 
 fn main() {
-    println!("Hello, world!");
+    part_one();
+}
+
+fn part_one() {
+    let input = read_input("include/input").unwrap();
+
+    let mut overlapping = 0;
+    for line in input.lines() {
+        let pairs = get_pairs(line);
+        if is_overlapping(&pairs[..]) {
+            overlapping += 1;
+        }
+    }
+    println!("overlapping pairs: {}", overlapping);
 }
 
 fn read_input(path: &str) -> Result<String, io::Error> {
@@ -35,9 +48,10 @@ fn get_pairs(line: &str) -> Vec<u8> {
     r
 }
 
-fn is_overlapping(pairs: &[u8; 4]) -> bool {
+fn is_overlapping(pairs: &[u8]) -> bool {
     match pairs {
         [l1, r1, l2, r2] => l1.le(l2) && r1.ge(r2) || l2.le(l1) && r2.ge(r1),
+        _ => panic!("incorrectly sized slice provided! must be a pair of pairs"),
     }
 }
 
@@ -82,10 +96,14 @@ mod tests {
     #[test]
     fn test_part_one() {
         let input = read_input("include/example").unwrap();
-        println!("{}", input);
+
+        let mut overlapping = 0;
         for line in input.lines() {
             let pairs = get_pairs(line);
-            println!("{:?}", pairs);
+            if is_overlapping(&pairs[..]) {
+                overlapping += 1;
+            }
         }
+        assert_eq!(overlapping, 2);
     }
 }
